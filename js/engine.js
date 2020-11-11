@@ -28,7 +28,31 @@ var replacer = {
     },
 
     post: function(input, post, id){
-        return input.replace("${post.title}", post.title).replace("${post.description}", post.description).replace('${post.url}', "/post.html?id="+id).replace("${post.cover}", gitblog.getImageUrl(post.cover));
+        return input
+            .replace("${post.title}", post.title)
+            .replace("${post.description}", post.description)
+            .replace('${post.url}', "/post.html?id="+id)
+            .replace("${post.cover}", gitblog.getImageUrl(post.cover))
+            .replace('${post.tag}', post.tags.length > 0 ? post.tags[0] : "")
+            .replace('${post.date}', this.formatDate(post.date));
+    },
+
+    user: function(input, user){
+        return input.replace("${user.title}", user.title).replace("${user.bio}", user.bio).replace('${user.url}', "/user.html?username="+user.username).replace("${user.name}", user.name).replace('${user.profilePicture}', gitblog.getImageUrl(user.profilePicture));
+    },
+
+    formatDate: function(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+    
+        if (month.length < 2) 
+            month = '0' + month;
+        if (day.length < 2) 
+            day = '0' + day;
+    
+        return [year, month, day].join('/');
     }
 }
 
@@ -36,23 +60,50 @@ $(function() {
     gitblog.getIndex().done(function(index){
         //load head tags from index
         fixHeadTags(index);
-        fixNewestPost(index);
+        fixPosts(index);
+        fixUsers(index);
     });
 
-    function fixNewestPost(index){
-        lastPostId = index.posts[index.posts.length - 1];
-        gitblog.getPost(lastPostId).done(function(post){
-            $('[data-gb="post-newest"]').each(function(i, obj){
-                var cloneObject = $(obj).clone();
-                var parent = $(obj).parent();
-                $(obj).remove();
-                var objAsText = replacer.post(cloneObject.prop('outerHTML'), post, lastPostId);
-                var newPost = $(createElementFromHTML(objAsText));
-                parent.append(newPost);
-                cloneObject.remove();
-            })
-        }).fail(function(){
-            $('[data-gb="post-newest"]').hide();
+    function fixUsers(index){
+        $('[data-gb="users"]').each(function(i, obj){
+            var cloneObject = $(obj).clone();
+            var sinfo = getSlice(cloneObject);
+            var parent = $(obj).parent();
+            $(obj).remove();
+            var usernames = index.usernames.slice(sinfo.start, sinfo.count);
+
+            usernames.forEach(username => {
+                gitblog.getUser(username).done(function(user){
+                    var objAsText = replacer.user(cloneObject.prop('outerHTML'), user);
+                    var newUser = $(createElementFromHTML(objAsText));
+                    parent.append(newUser);
+                    cloneObject.remove();
+                });
+            });
+
+        });
+        
+    }
+
+    function fixPosts(index){
+        $('[data-gb="posts"]').each(function(i, obj){
+            var cloneObject = $(obj).clone();
+            var parent = $(obj).parent();
+            $(obj).remove();
+
+            var sinfo = getSlice(cloneObject);
+            console.log(sinfo);
+            var postIds = index.posts.slice(sinfo.start, sinfo.count);
+            console.log(postIds);
+            postIds.forEach(postId => {
+                gitblog.getPost(postId).done(function(post){
+                    var objAsText = replacer.post(cloneObject.prop('outerHTML'), post, postId);
+                    var newPost = $(createElementFromHTML(objAsText));
+                    parent.append(newPost);
+                })
+            });
+            cloneObject.remove();
+            
         })
     }
     
@@ -84,5 +135,12 @@ $(function() {
         })
     }
     
+
+    function getSlice(obj){
+        var sliceStart = obj.data("gb-slice-start") !== undefined ? obj.data("gb-slice-start") : -10;
+        var sliceCount = obj.data("gb-slice-count") !== undefined ? obj.data("gb-slice-count") : 10;
+
+        return {"start": sliceStart, "count": sliceCount};
+    }
 });
 
