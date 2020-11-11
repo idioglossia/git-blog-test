@@ -1,5 +1,5 @@
 var gitblog = {
-    dbPath: '/db',
+    dbPath: 'db',
 
     setDbPath: function(path){
         this.dbPath = path;
