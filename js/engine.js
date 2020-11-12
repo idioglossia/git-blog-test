@@ -28,15 +28,20 @@ var replacer = {
     },
 
     post: function(input, post, id){
-        console.log(gitblog.getImageUrl(post.cover));
         return input
             .replace("${post.title}", post.title)
+            .replace("${post.content}", post.content)
             .replace("${post.description}", post.description)
+            .replace("${post.username}", post.username)
             .replace('${post.url}', "/post.html?id="+id)
             .replace("${post.cover}", gitblog.getImageUrl(post.cover))
             .replace("${post.thumbnail}", post.thumbnail != null ? gitblog.getImageUrl(post.thumbnail) : "")
             .replace('${post.tag}', post.tags.length > 0 ? post.tags[0] : "")
             .replace('${post.date}', this.formatDate(post.date));
+    },
+
+    postCover: function(input, post){
+        return input.replace("${post.cover}", gitblog.getImageUrl(post.cover));
     },
 
     user: function(input, user){
@@ -64,7 +69,43 @@ $(function() {
         fixHeadTags(index);
         fixPosts(index);
         fixUsers(index);
+        fixPagePost();
     });
+
+    function fixPagePost(){
+        var postId = getUrlParameter("id");
+        if(postId !== undefined){
+            gitblog.getPost(postId).done(function(post){
+                $('[data-gb="post"]').each(function(i, obj){
+                    var cloneObject = $(obj).clone();
+                    var parent = $(obj).parent();
+                    $(obj).remove();
+                    var objAsText = replacer.post(cloneObject.prop('outerHTML'), post, postId);
+                    var newPost = $(createElementFromHTML(objAsText));
+                    parent.append(newPost);
+                });
+                $('[data-gb="post-cover"]').each(function(i,obj){
+                    var cloneObject = $(obj).clone();
+                    var parent = $(obj).parent();
+                    $(obj).remove();
+                    var objAsText = replacer.postCover(cloneObject.prop('outerHTML'), post);
+                    var newPostCover = $(createElementFromHTML(objAsText));
+                    parent.append(newPostCover);
+                });
+                $('[data-gb="post-user"]').each(function(i, obj){
+                    gitblog.getUser(post.username).done(function(user){
+                        var cloneObject = $(obj).clone();
+                        var parent = $(obj).parent();
+                        $(obj).remove();
+                        var objAsText = replacer.user(cloneObject.prop('outerHTML'), user);
+                        var newUser = $(createElementFromHTML(objAsText));
+                        parent.append(newUser);
+                    });
+                    
+                });
+            });
+        }
+    }
 
     function fixUsers(index){
         $('[data-gb="users"]').each(function(i, obj){

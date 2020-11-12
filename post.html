@@ -11,6 +11,11 @@
 
   <title>Blog Template for Git Blog</title>
 
+  <script src="js/jquery-3.5.1.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/engine.js"></script>
+
+
   <!-- Bootstrap core CSS -->
   <link href="css/bootstrap.css" rel="stylesheet">
 
@@ -33,92 +38,43 @@
 
     <div class="nav-scroller py-1 mb-2">
       <nav class="nav d-flex justify-content-between">
-        <a class="p-2 text-muted" href="#">Tag 1</a>
-        <a class="p-2 text-muted" href="#">Tag 2</a>
-        <a class="p-2 text-muted" href="#">Tag 3</a>
-        <a class="p-2 text-muted" href="#">Tag 4</a>
-        <a class="p-2 text-muted" href="#">Tag 5</a>
-        <a class="p-2 text-muted" href="#">Tag 6</a>
-        <a class="p-2 text-muted" href="#">Tag 7</a>
-        <a class="p-2 text-muted" href="#">Tag 8</a>
-        <a class="p-2 text-muted" href="#">Tag 9</a>
-        <a class="p-2 text-muted" href="#">Tag 10</a>
-        <a class="p-2 text-muted" href="#">Tag 11</a>
+        <a class="p-2" href="${tag.url}" data-gb="tags" data-gb-active="text-primary" data-gb-inactive="text-muted">${tag.name}</a>
       </nav>
     </div>
 
-    <div class="jumbotron p-3 p-md-5 text-white rounded blog-cover">
+    <div>
+      <div class="jumbotron p-3 p-md-5 text-white rounded blog-cover" style="background-image: url(${post.cover});" data-gb="post-cover">
 
+      </div>
     </div>
+    
   </div>
 
   <main role="main" class="container">
 
     <div class="col-12 blog-main">
 
-      <div class="blog-post">
-        <h2 class="blog-post-title">Sample blog post</h2>
-        <p class="blog-post-meta">January 1, 2014 by <a href="#">Mark</a></p>
+      <div class="blog-post" data-gb="post">
+        <h2 class="blog-post-title">${post.title}</h2>
+        <p class="blog-post-meta">${post.date} by <a href="#">${post.username}</a></p>
 
-        <p>This blog post shows a few different types of content
-          that's supported and styled with Bootstrap. Basic typography, images,
-          and code are all supported.</p>
+        <small>${post.description}</small>
         <hr>
-        <p>Cum sociis natoque penatibus et magnis <a href="#">dis parturient montes</a>,
-          nascetur ridiculus mus. Aenean eu leo quam. Pellentesque ornare sem
-          lacinia quam venenatis vestibulum. Sed posuere consectetur est at
-          lobortis. Cras mattis consectetur purus sit amet fermentum.</p>
-        <blockquote>
-          <p>Curabitur blandit tempus porttitor. <strong>Nullam quis risus eget urna mollis</strong> ornare vel eu leo.
-            Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
-        </blockquote>
-        <p>Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum.
-          Aenean lacinia bibendum nulla sed consectetur.</p>
-        <h2>Heading</h2>
-        <p>Vivamus sagittis lacus vel augue laoreet rutrum faucibus
-          dolor auctor. Duis mollis, est non commodo luctus, nisi erat porttitor
-          ligula, eget lacinia odio sem nec elit. Morbi leo risus, porta ac
-          consectetur ac, vestibulum at eros.</p>
-        <h3>Sub-heading</h3>
-        <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
-        <pre><code>Example code block</code></pre>
-        <p>Aenean lacinia bibendum nulla sed consectetur. Etiam
-          porta sem malesuada magna mollis euismod. Fusce dapibus, tellus ac
-          cursus commodo, tortor mauris condimentum nibh, ut fermentum massa.</p>
-        <h3>Sub-heading</h3>
-        <p>Cum sociis natoque penatibus et magnis dis parturient
-          montes, nascetur ridiculus mus. Aenean lacinia bibendum nulla sed
-          consectetur. Etiam porta sem malesuada magna mollis euismod. Fusce
-          dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut
-          fermentum massa justo sit amet risus.</p>
-        <ul>
-          <li>Praesent commodo cursus magna, vel scelerisque nisl consectetur et.</li>
-          <li>Donec id elit non mi porta gravida at eget metus.</li>
-          <li>Nulla vitae elit libero, a pharetra augue.</li>
-        </ul>
-        <p>Donec ullamcorper nulla non metus auctor fringilla. Nulla vitae elit libero, a pharetra augue.</p>
-        <ol>
-          <li>Vestibulum id ligula porta felis euismod semper.</li>
-          <li>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</li>
-          <li>Maecenas sed diam eget risus varius blandit sit amet non magna.</li>
-        </ol>
-        <p>Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis.</p>
+        
+        ${post.content}
+        <hr>
       </div><!-- /.blog-post -->
 
     </div><!-- /.blog-main -->
 
 
     <div class="col-12 user-card">
-      <div class="user-card-holder">
-        <img class="rounded-circle"
-          src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="
-          alt="Generic placeholder image" width="140" height="140">
-        <h2>John Smith</h2>
-        <small>Developer</small>
-        <p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies
-          vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus
-          magna.</p>
-        <a class="btn btn-secondary" href="#" role="button">View Profile »</a>
+      <div class="user-card-holder" data-gb="post-user">
+        <img class="rounded-circle" src="${user.profilePicture}" alt="Generic placeholder image" width="140" height="140">
+        <h2>${user.name}</h2>
+        <small>${user.title}</small>
+        <p style="text-align: center;">${user.bio}</p>
+        <a class="btn btn-secondary" href="${user.url}" role="button">View Profile »</a>
       </div>
     </div>
 
@@ -172,9 +128,6 @@
   <!-- Bootstrap core JavaScript
     ================================================== -->
   <!-- Placed at the end of the document so the pages load faster -->
-  <script src="js/jquery-3.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-    crossorigin="anonymous"></script>
-  <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
   <script src="js/popper.js"></script>
   <script src="Bljs/bootstrap.js"></script>
   <script src="js/holder.js"></script>
