@@ -139,12 +139,14 @@ $(function() {
                         page = parseInt(page);
                     }
 
+                    if(user.postIds == null){
+                        user.postIds = []
+                    }
+
                     // console.log('page ' + page);
                     // console.log('size ' + size);
 
                     postIds = cleanSlice(user.postIds.reverse(), page * size, ((page + 1) * size));
-                    // console.log('cs: '+user.postIds, page * size + ' - ' + ((page + 1) * size));
-                    // console.log('postIds '+postIds);
                     writePosts(obj, postIds);
                     $(obj).remove();
 
