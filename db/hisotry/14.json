@@ -1,0 +1,1 @@
+{"id":null,"date":"2020-11-12T06:58:20.998+0000","icon":{"color":"bg-info","iconClass":"fa-file-word","preClass":"fas","fullClass":"fas fa-file-word bg-info"},"titleLink":{"text":"admin","link":"/panel/users/admin"},"titleAction":" updated post: Rest Over Websocket","description":" Spring Boot Websocket that wrapps Rest API","button":{"text":"See Post","link":"/panel/posts/3"}}
