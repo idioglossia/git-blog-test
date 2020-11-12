@@ -13,15 +13,14 @@ function getUrlParameter(sParam) {
     }
 };
 
+//makes element from html string
 function createElementFromHTML(htmlString) {
     var div = document.createElement('div');
     div.innerHTML = htmlString.trim();
-  
-    // Change this to div.childNodes to support multiple top-level nodes
     return div.firstChild; 
 }
 
-
+//replaces content of elements with proper values from user, post, tag
 var replacer = {
     tags: function(input, tagName){
         return input.replace("${tag.name}", tagName.replace('-', ' ')).replace("${tag.url}", "tag.html?tag="+tagName);
@@ -72,6 +71,7 @@ $(function() {
         fixPagePost();
     });
 
+    //fixes a post page: content, cover, user, related posts
     function fixPagePost(){
         var postId = getUrlParameter("id");
         if(postId !== undefined){
@@ -103,10 +103,12 @@ $(function() {
                     });
                     
                 });
+                fixRelatedPosts(post, postId);
             });
         }
     }
 
+    //fixes users based on index
     function fixUsers(index){
         $('[data-gb="users"]').each(function(i, obj){
             var cloneObject = $(obj).clone();
@@ -124,28 +126,43 @@ $(function() {
             });
 
         });
-        
+   
     }
 
+    //fixes posts related to a post id
+    //does it for maximum 4 new posts in tags
+    function fixRelatedPosts(post, postId){
+        var ignore = new Set([postId]);
+        var i = 0;
+        var obj = $('[data-gb="posts-related"]')[0];
+        var cloneObject = $(obj).clone();
+        var parent = $(obj).parent();
+        post.tags.forEach(tag => {
+            gitblog.getTag(tag).done(function(tag){
+                tag.postIds.slice(0, 5).forEach(function(pid){
+                    if(postId != pid && i < 4 && !ignore.has(pid)){
+                        console.log(pid + " is related to " + postId)                        
+                        writePostIntoParent(cloneObject, pid, parent);
+                        i++;
+                        ignore.add(pid);
+                    }
+                });
+            })
+        });
+        cloneObject.remove();
+        obj.remove();
+    }
+
+    //fixes list of posts using index
     function fixPosts(index){
         $('[data-gb="posts"]').each(function(i, obj){
-            var cloneObject = $(obj).clone();
-            var parent = $(obj).parent();
+            var postIds = sliceArr(obj, index.posts);
+            writePosts(obj, postIds);
             $(obj).remove();
-
-            var postIds = sliceArr(cloneObject, index.posts);
-            postIds.forEach(postId => {
-                gitblog.getPost(postId).done(function(post){
-                    var objAsText = replacer.post(cloneObject.prop('outerHTML'), post, postId);
-                    var newPost = $(createElementFromHTML(objAsText));
-                    parent.append(newPost);
-                })
-            });
-            cloneObject.remove();
-            
-        })
+        });
     }
     
+    //fixes tags in head of the page
     function fixHeadTags(index){
         $('[data-gb="tags"]').each(function(i, obj){
             var cloneObject = $(obj).clone();
@@ -174,6 +191,7 @@ $(function() {
         })
     }
     
+    //slices an array based on slice information of an element
     function sliceArr(obj, arr){
         var sliceObj = getSliceObj(obj);
         if(sliceObj.end === undefined)
@@ -182,11 +200,33 @@ $(function() {
             return arr.slice(sliceObj.start, sliceObj.end);
     }
 
+    //returns slice information of an element
     function getSliceObj(obj){
+        obj = $(obj);
         var sliceStart = obj.data("gb-slice-start") !== undefined ? obj.data("gb-slice-start") : -10;
         var sliceEnd = obj.data("gb-slice-end");
 
         return {"start": sliceStart, "end": sliceEnd};
     }
+
+    //writes arrays of posts into a parent
+    function writePosts(obj,arr){
+        var cloneObject = $(obj).clone();
+        var parent = $(obj).parent();
+        arr.forEach(postId => {
+            writePostIntoParent(cloneObject, postId, parent);
+        });
+        cloneObject.remove();
+    }
+
+    //writes a post obj into its parent
+    function writePostIntoParent(cloneObject, postId, parent){
+        gitblog.getPost(postId).done(function(post){
+            var objAsText = replacer.post(cloneObject.prop('outerHTML'), post, postId);
+            var newPost = $(createElementFromHTML(objAsText));
+            parent.append(newPost);
+        });
+    }
+
 });
 
