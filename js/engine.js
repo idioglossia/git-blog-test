@@ -68,9 +68,50 @@ $(function() {
         fixHeadTags(index);
         fixPosts(index);
         fixUsers(index);
-        fixPagePost();
+        fixPostPage();
         fixUserProfile();
+        fixTagPage();
     });
+
+    //fixes a tag page
+    function fixTagPage(){
+        var tagName = getUrlParameter("tag");
+        if(tagName !== undefined){
+            gitblog.getTag(tagName).done(function(tag){
+                $('[data-gb="tag-holder"]').each(function(i, obj){
+                    var cloneObject = $(obj).clone();
+                    var parent = $(obj).parent();
+                    obj.remove();
+                    var objAsText = replacer.tags(cloneObject.prop('outerHTML'), tagName);
+                    var tagInfo = $(createElementFromHTML(objAsText));
+                    parent.append(tagInfo);
+                    cloneObject.remove();
+                });
+
+                $('[data-gb="tag-posts"]').each(function(i, obj){
+                    var size = $(obj).data("gb-size-per-page");
+                    var page = getUrlParameter("page");
+                    
+                    if(page === undefined){
+                        page = 0;
+                    }else{
+                        page = parseInt(page);
+                    }
+
+                    // console.log('page ' + page);
+                    // console.log('size ' + size);
+
+                    postIds = cleanSlice(tag.postIds.reverse(), page * size, ((page + 1) * size));
+                    // console.log('cs: '+user.postIds, page * size + ' - ' + ((page + 1) * size));
+                    // console.log('postIds '+postIds);
+                    writePosts(obj, postIds);
+                    $(obj).remove();
+
+                    fixPagination(tag.postIds.length, size, "tag="+tagName);
+                });
+            })
+        }
+    }
 
     //fixes a user profile content
     function fixUserProfile(){
@@ -114,8 +155,6 @@ $(function() {
     }
 
     function fixPagination(size, sizePerPage, query){
-        if(size < sizePerPage)
-            return;
 
         var pagination = $('[data-gb="pagination"]')[0];
         var backward = $($(pagination).find('[data-gb-pg="backward"]')[0]);
@@ -144,7 +183,7 @@ $(function() {
    
 
     //fixes a post page: content, cover, user, related posts
-    function fixPagePost(){
+    function fixPostPage(){
         var postId = getUrlParameter("id");
         if(postId !== undefined){
             gitblog.getPost(postId).done(function(post){
