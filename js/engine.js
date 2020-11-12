@@ -91,16 +91,19 @@ $(function() {
                 $('[data-gb="user-posts"]').each(function(i, obj){
                     var size = $(obj).data("gb-size-per-page");
                     var page = getUrlParameter("page");
-                    console.log(page);
-                    console.log(size);
+                    
                     if(page === undefined){
                         page = 0;
                     }else{
                         page = parseInt(page);
                     }
 
-                    postIds = cleanSlice(user.postIds, page * size, ((page + 1) * size));
-                    console.log(postIds);
+                    // console.log('page ' + page);
+                    // console.log('size ' + size);
+
+                    postIds = cleanSlice(user.postIds.reverse(), page * size, ((page + 1) * size));
+                    // console.log('cs: '+user.postIds, page * size + ' - ' + ((page + 1) * size));
+                    // console.log('postIds '+postIds);
                     writePosts(obj, postIds);
                     $(obj).remove();
 
@@ -115,8 +118,8 @@ $(function() {
             return;
 
         var pagination = $('[data-gb="pagination"]')[0];
-        var older = $($(pagination).find('[data-gb-pg="older"]')[0]);
-        var newer = $($(pagination).find('[data-gb-pg="newer"]')[0]);
+        var backward = $($(pagination).find('[data-gb-pg="backward"]')[0]);
+        var forward = $($(pagination).find('[data-gb-pg="forward"]')[0]);
         var page = getUrlParameter("page");
         
         if(page === undefined){
@@ -126,15 +129,15 @@ $(function() {
         }
 
         if(page > 0){
-            older.attr("href", "?page=" + (page - 1) + ((query !== null || query !== undefined) ? '&' + query : ''));
+            backward.attr("href", "?page=" + (page - 1) + ((query !== null || query !== undefined) ? '&' + query : ''));
         }else{
-            older.addClass(older.attr("data-gb-pg-inactive"));
+            backward.addClass(backward.attr("data-gb-pg-inactive"));
         }
 
         if(((page + 1) * sizePerPage) < size){
-            newer.attr("href", "?page=" + (page + 1) + ((query !== null || query !== undefined) ? '&' + query : ''));
+            forward.attr("href", "?page=" + (page + 1) + ((query !== null || query !== undefined) ? '&' + query : ''));
         }else{
-            newer.addClass(newer.attr("data-gb-pg-inactive"));
+            forward.addClass(forward.attr("data-gb-pg-inactive"));
         }
     }
 
