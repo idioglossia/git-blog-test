@@ -24,7 +24,7 @@ function createElementFromHTML(htmlString) {
 
 var replacer = {
     tags: function(input, tagName){
-        return input.replace("${tag.name}", tagName.replace('-', ' ')).replace("${tag.url}", "/tag.html?tag="+tagName);
+        return input.replace("${tag.name}", tagName.replace('-', ' ')).replace("${tag.url}", "tag.html?tag="+tagName);
     },
 
     post: function(input, post, id){
@@ -33,7 +33,7 @@ var replacer = {
             .replace("${post.content}", post.content)
             .replace("${post.description}", post.description)
             .replace("${post.username}", post.username)
-            .replace('${post.url}', "/post.html?id="+id)
+            .replace('${post.url}', "post.html?id="+id)
             .replace("${post.cover}", gitblog.getImageUrl(post.cover))
             .replace("${post.thumbnail}", post.thumbnail != null ? gitblog.getImageUrl(post.thumbnail) : "")
             .replace('${post.tag}', post.tags.length > 0 ? post.tags[0] : "")
@@ -45,7 +45,7 @@ var replacer = {
     },
 
     user: function(input, user){
-        return input.replace("${user.title}", user.title).replace("${user.bio}", user.bio).replace('${user.url}', "/user.html?username="+user.username).replace("${user.name}", user.name).replace('${user.profilePicture}', gitblog.getImageUrl(user.profilePicture));
+        return input.replace("${user.title}", user.title).replace("${user.bio}", user.bio).replace('${user.url}', "user.html?username="+user.username).replace("${user.name}", user.name).replace('${user.profilePicture}', gitblog.getImageUrl(user.profilePicture));
     },
 
     formatDate: function(date) {
