@@ -69,7 +69,76 @@ $(function() {
         fixPosts(index);
         fixUsers(index);
         fixPagePost();
+        fixUserProfile();
     });
+
+    //fixes a user profile content
+    function fixUserProfile(){
+        var username = getUrlParameter("username");
+        if(username !== undefined){
+            gitblog.getUser(username).done(function(user){
+                $('[data-gb="user"]').each(function(i, obj){
+                    var cloneObject = $(obj).clone();
+                    var parent = $(obj).parent();
+                    $(obj).remove();
+                    var objAsText = replacer.user(cloneObject.prop('outerHTML'), user);
+                    var newUser = $(createElementFromHTML(objAsText));
+                    parent.append(newUser);
+                    cloneObject.remove();
+
+                });
+
+                $('[data-gb="user-posts"]').each(function(i, obj){
+                    var size = $(obj).data("gb-size-per-page");
+                    var page = getUrlParameter("page");
+                    console.log(page);
+                    console.log(size);
+                    if(page === undefined){
+                        page = 0;
+                    }else{
+                        page = parseInt(page);
+                    }
+
+                    postIds = cleanSlice(user.postIds, page * size, ((page + 1) * size));
+                    console.log(postIds);
+                    writePosts(obj, postIds);
+                    $(obj).remove();
+
+                    fixPagination(user.postIds.length, size, "username="+username);
+                });
+            });
+        }
+    }
+
+    function fixPagination(size, sizePerPage, query){
+        if(size < sizePerPage)
+            return;
+
+        var pagination = $('[data-gb="pagination"]')[0];
+        var older = $($(pagination).find('[data-gb-pg="older"]')[0]);
+        var newer = $($(pagination).find('[data-gb-pg="newer"]')[0]);
+        var page = getUrlParameter("page");
+        
+        if(page === undefined){
+            page = 0;
+        }else{
+            page = parseInt(page);
+        }
+
+        if(page > 0){
+            older.attr("href", "?page=" + (page - 1) + ((query !== null || query !== undefined) ? '&' + query : ''));
+        }else{
+            older.addClass(older.attr("data-gb-pg-inactive"));
+        }
+
+        if(((page + 1) * sizePerPage) < size){
+            newer.attr("href", "?page=" + (page + 1) + ((query !== null || query !== undefined) ? '&' + query : ''));
+        }else{
+            newer.addClass(newer.attr("data-gb-pg-inactive"));
+        }
+    }
+
+   
 
     //fixes a post page: content, cover, user, related posts
     function fixPagePost(){
@@ -226,6 +295,15 @@ $(function() {
             var newPost = $(createElementFromHTML(objAsText));
             parent.append(newPost);
         });
+    }
+
+    function cleanSlice(arr, f, t){
+        var res = [];
+        for(i = f; i < t; i++){
+            res[res.length] = arr[i];
+        }
+
+        return res;
     }
 
 });
