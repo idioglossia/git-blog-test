@@ -24,7 +24,7 @@ function createElementFromHTML(htmlString) {
 
 var replacer = {
     tags: function(input, tagName){
-        return input.replace("${tag.name}", tagName).replace("${tag.url}", "/tag.html?tag="+tagName);
+        return input.replace("${tag.name}", tagName.replace('-', ' ')).replace("${tag.url}", "/tag.html?tag="+tagName);
     },
 
     post: function(input, post, id){
