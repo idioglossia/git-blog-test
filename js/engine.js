@@ -28,11 +28,13 @@ var replacer = {
     },
 
     post: function(input, post, id){
+        console.log(gitblog.getImageUrl(post.cover));
         return input
             .replace("${post.title}", post.title)
             .replace("${post.description}", post.description)
             .replace('${post.url}', "/post.html?id="+id)
             .replace("${post.cover}", gitblog.getImageUrl(post.cover))
+            .replace("${post.thumbnail}", post.thumbnail != null ? gitblog.getImageUrl(post.thumbnail) : "")
             .replace('${post.tag}', post.tags.length > 0 ? post.tags[0] : "")
             .replace('${post.date}', this.formatDate(post.date));
     },
@@ -67,10 +69,9 @@ $(function() {
     function fixUsers(index){
         $('[data-gb="users"]').each(function(i, obj){
             var cloneObject = $(obj).clone();
-            var sinfo = getSlice(cloneObject);
             var parent = $(obj).parent();
             $(obj).remove();
-            var usernames = index.usernames.slice(sinfo.start, sinfo.count);
+            var usernames = sliceArr(cloneObject, index.usernames);
 
             usernames.forEach(username => {
                 gitblog.getUser(username).done(function(user){
@@ -91,10 +92,7 @@ $(function() {
             var parent = $(obj).parent();
             $(obj).remove();
 
-            var sinfo = getSlice(cloneObject);
-            console.log(sinfo);
-            var postIds = index.posts.slice(sinfo.start, sinfo.count);
-            console.log(postIds);
+            var postIds = sliceArr(cloneObject, index.posts);
             postIds.forEach(postId => {
                 gitblog.getPost(postId).done(function(post){
                     var objAsText = replacer.post(cloneObject.prop('outerHTML'), post, postId);
@@ -135,12 +133,19 @@ $(function() {
         })
     }
     
+    function sliceArr(obj, arr){
+        var sliceObj = getSliceObj(obj);
+        if(sliceObj.end === undefined)
+            return arr.slice(sliceObj.start);
+        else
+            return arr.slice(sliceObj.start, sliceObj.end);
+    }
 
-    function getSlice(obj){
+    function getSliceObj(obj){
         var sliceStart = obj.data("gb-slice-start") !== undefined ? obj.data("gb-slice-start") : -10;
-        var sliceCount = obj.data("gb-slice-count") !== undefined ? obj.data("gb-slice-count") : 10;
+        var sliceEnd = obj.data("gb-slice-end");
 
-        return {"start": sliceStart, "count": sliceCount};
+        return {"start": sliceStart, "end": sliceEnd};
     }
 });
 
