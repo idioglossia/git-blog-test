@@ -26,17 +26,28 @@ var replacer = {
         return input.replace("${tag.name}", tagName.replace('-', ' ')).replace("${tag.url}", "tag.html?tag="+tagName);
     },
 
-    post: function(input, post, id){
-        return input
+    post: function(input, post, id, user = undefined){
+        input = input
             .replace("${post.title}", post.title)
             .replace("${post.content}", post.content)
             .replace("${post.description}", post.description)
             .replace("${post.username}", post.username)
-            .replace('${post.url}', "post.html?id="+id)
+            .replace('${post.url}', "post.html?postId="+id)
             .replace("${post.cover}", gitblog.getImageUrl(post.cover))
             .replace("${post.thumbnail}", post.thumbnail != null ? gitblog.getImageUrl(post.thumbnail) : "")
             .replace('${post.tag}', post.tags.length > 0 ? post.tags[0] : "")
             .replace('${post.date}', this.formatDate(post.date));
+
+        if(user !== undefined){
+            console.log("Supposed to fetch user ...");
+            while(input.includes("${post.user")){
+                input = input.replace("${post.user", "${user");
+            }
+            console.log(input);
+            input = this.user(input, user);
+        }
+
+        return input;
     },
 
     postCover: function(input, post){
@@ -98,12 +109,7 @@ $(function() {
                         page = parseInt(page);
                     }
 
-                    // console.log('page ' + page);
-                    // console.log('size ' + size);
-
                     postIds = cleanSlice(tag.postIds.reverse(), page * size, ((page + 1) * size));
-                    // console.log('cs: '+user.postIds, page * size + ' - ' + ((page + 1) * size));
-                    // console.log('postIds '+postIds);
                     writePosts(obj, postIds);
                     $(obj).remove();
 
@@ -142,9 +148,6 @@ $(function() {
                     if(user.postIds == null){
                         user.postIds = []
                     }
-
-                    // console.log('page ' + page);
-                    // console.log('size ' + size);
 
                     postIds = cleanSlice(user.postIds.reverse(), page * size, ((page + 1) * size));
                     writePosts(obj, postIds);
@@ -186,16 +189,15 @@ $(function() {
 
     //fixes a post page: content, cover, user, related posts
     function fixPostPage(){
-        var postId = getUrlParameter("id");
+        var postId = getUrlParameter("postId");
         if(postId !== undefined){
             gitblog.getPost(postId).done(function(post){
                 $('[data-gb="post"]').each(function(i, obj){
                     var cloneObject = $(obj).clone();
                     var parent = $(obj).parent();
                     $(obj).remove();
-                    var objAsText = replacer.post(cloneObject.prop('outerHTML'), post, postId);
-                    var newPost = $(createElementFromHTML(objAsText));
-                    parent.append(newPost);
+                    writePostIntoParent(cloneObject, postId, parent);
+                    cloneObject.remove();
                 });
                 $('[data-gb="post-cover"]').each(function(i,obj){
                     var cloneObject = $(obj).clone();
@@ -254,7 +256,6 @@ $(function() {
             gitblog.getTag(tag).done(function(tag){
                 tag.postIds.slice(0, 5).forEach(function(pid){
                     if(postId != pid && i < 4 && !ignore.has(pid)){
-                        console.log(pid + " is related to " + postId)                        
                         writePostIntoParent(cloneObject, pid, parent);
                         i++;
                         ignore.add(pid);
@@ -335,9 +336,19 @@ $(function() {
     //writes a post obj into its parent
     function writePostIntoParent(cloneObject, postId, parent){
         gitblog.getPost(postId).done(function(post){
-            var objAsText = replacer.post(cloneObject.prop('outerHTML'), post, postId);
-            var newPost = $(createElementFromHTML(objAsText));
-            parent.append(newPost);
+            var fetchPostUser = cloneObject.data("gb-post-fetch-user") !== undefined && cloneObject.data("gb-post-fetch-user") !== '-1' ? true : false;
+            if(fetchPostUser){
+                gitblog.getUser(post.username).done(function(user){
+                    var objAsText = replacer.post(cloneObject.prop('outerHTML'), post, postId, user);
+                    var newPost = $(createElementFromHTML(objAsText));
+                    parent.append(newPost);
+                });
+            }else{
+                var objAsText = replacer.post(cloneObject.prop('outerHTML'), post, postId);
+                var newPost = $(createElementFromHTML(objAsText));
+                parent.append(newPost);
+            }
+            
         });
     }
 
