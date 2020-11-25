@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="">
   <meta name="author" content="">
-  <link rel="icon" href="https://getbootstrap.com/docs/4.0/assets/img/favicons/favicon.ico">
 
   <title>Blog Template for Git Blog</title>
 
@@ -24,7 +23,7 @@
   <link href="css/custom.css" rel="stylesheet">
 </head>
 
-<body>
+<body style="display: none;">
 
   <div class="container">
     <header class="blog-header py-3">
@@ -45,7 +44,7 @@
     <main class="row mb-2">
       <div class="col-12 user-card">
         <div class="user-card-holder" data-gb="user">
-          <img class="rounded-circle" src="${user.profilePicture}" alt="Generic placeholder image" width="140"
+          <img class="rounded-circle" gb-src="${user.profilePicture}" alt="Generic placeholder image" width="140"
             height="140">
           <h2>${user.name}</h2>
           <small>${user.title}</small>
@@ -64,13 +63,13 @@
           <div class="card-body d-flex flex-column align-items-start">
             <strong class="d-inline-block mb-2 text-primary">${post.tag}</strong>
             <h3 class="mb-0">
-              <a class="text-dark" href="#">${post.title}</a>
+              <a class="text-dark" href="${post.url}">${post.title}</a>
             </h3>
             <div class="mb-1 text-muted">${post.date}</div>
             <p class="card-text mb-auto">${post.description}</p>
             <a href="${post.url}">Continue reading</a>
           </div>
-          <img class="card-img-right flex-auto d-none d-md-block" style="width: 200px; height: 250px;" src="${post.thumbnail}" data-holder-rendered="true">
+          <img class="card-img-right flex-auto d-none d-md-block" style="width: 200px; height: 250px;" gb-src="${post.thumbnail}" data-holder-rendered="true">
         </div>
       </div>
     </div>

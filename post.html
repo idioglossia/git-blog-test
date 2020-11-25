@@ -43,7 +43,7 @@
     </div>
 
     <div>
-      <div class="jumbotron p-3 p-md-5 text-white rounded blog-cover" style="background-image: url(${post.cover});" data-gb="post-cover">
+      <div class="jumbotron p-3 p-md-5 text-white rounded blog-cover" style="background-image: gb-url(${post.cover});" data-gb="post-cover">
 
       </div>
     </div>
@@ -70,7 +70,7 @@
 
     <div class="col-12 user-card">
       <div class="user-card-holder" data-gb="post-user">
-        <img class="rounded-circle" src="${user.profilePicture}" alt="Generic placeholder image" width="140" height="140">
+        <img class="rounded-circle" gb-src="${user.profilePicture}" alt="Generic placeholder image" width="140" height="140">
         <h2>${user.name}</h2>
         <small>${user.title}</small>
         <p style="text-align: center;">${user.bio}</p>
@@ -90,13 +90,13 @@
           <div class="card-body d-flex flex-column align-items-start">
             <strong class="d-inline-block mb-2 text-primary">${post.tag}</strong>
             <h3 class="mb-0">
-              <a class="text-dark" href="#">${post.title}</a>
+              <a class="text-dark" href="${post.url}">${post.title}</a>
             </h3>
             <div class="mb-1 text-muted">${post.date}</div>
             <p class="card-text mb-auto">${post.description}</p>
             <a href="${post.url}">Continue reading</a>
           </div>
-          <img class="card-img-right flex-auto d-none d-md-block" style="width: 200px; height: 250px;" src="${post.thumbnail}" data-holder-rendered="true">
+          <img class="card-img-right flex-auto d-none d-md-block" style="width: 200px; height: 250px;" gb-src="${post.thumbnail}" data-holder-rendered="true">
         </div>
       </div>
     </div>

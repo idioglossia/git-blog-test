@@ -22,40 +22,44 @@ function createElementFromHTML(htmlString) {
 
 //replaces content of elements with proper values from user, post, tag
 var replacer = {
+    srcFix: function(input){
+        input = input.replace(/gb-src/g, "src")
+        input = input.replace(/gb-url/g, "url")
+        return input;
+    },
+
     tags: function(input, tagName){
-        return input.replace("${tag.name}", tagName.replace('-', ' ')).replace("${tag.url}", "tag.html?tag="+tagName);
+        return input.replace(/\${tag.name}/g, tagName.replace(/-/g, ' ')).replace(/\${tag.url}/g, "tag.html?tag="+tagName);
     },
 
     post: function(input, post, id, user = undefined){
         input = input
-            .replace("${post.title}", post.title)
-            .replace("${post.content}", post.content)
-            .replace("${post.description}", post.description)
-            .replace("${post.username}", post.username)
-            .replace('${post.url}', "post.html?postId="+id)
-            .replace("${post.cover}", gitblog.getImageUrl(post.cover))
-            .replace("${post.thumbnail}", post.thumbnail != null ? gitblog.getImageUrl(post.thumbnail) : "")
-            .replace('${post.tag}', post.tags.length > 0 ? post.tags[0] : "")
-            .replace('${post.date}', this.formatDate(post.date));
+            .replace(/\${post.title}/g, post.title)
+            .replace(/\${post.content}/g, post.content)
+            .replace(/\${post.description}/g, post.description)
+            .replace(/\${post.username}/g, post.username)
+            .replace(/\${post.url}/g, "post.html?postId="+id)
+            .replace(/\${post.cover}/g, gitblog.getImageUrl(post.cover))
+            .replace(/\${post.thumbnail}/g, post.thumbnail !== null && post.thumbnail !== undefined ? gitblog.getImageUrl(post.thumbnail) : "")
+            .replace(/\${post.tag}/g, post.tags.length > 0 ? post.tags[0] : "")
+            .replace(/\${post.date}/g, this.formatDate(post.date));
 
         if(user !== undefined){
-            console.log("Supposed to fetch user ...");
-            while(input.includes("${post.user")){
-                input = input.replace("${post.user", "${user");
-            }
-            console.log(input);
+            input = input.replace(/\${post.user/g, "${user");
             input = this.user(input, user);
         }
 
-        return input;
+        return this.srcFix(input);
     },
 
     postCover: function(input, post){
-        return input.replace("${post.cover}", gitblog.getImageUrl(post.cover));
+        input = input.replace(/\${post.cover}/, gitblog.getImageUrl(post.cover));
+        return this.srcFix(input);
     },
 
     user: function(input, user){
-        return input.replace("${user.title}", user.title).replace("${user.bio}", user.bio).replace('${user.url}', "user.html?username="+user.username).replace("${user.name}", user.name).replace('${user.profilePicture}', gitblog.getImageUrl(user.profilePicture));
+        input = input.replace(/\${user.title}/, user.title).replace(/\${user.bio}/, user.bio).replace(/\${user.url}/g, "user.html?username="+user.username).replace(/\${user.name}/g, user.name).replace(/\${user.profilePicture}/g, gitblog.getImageUrl(user.profilePicture));
+        return this.srcFix(input);
     },
 
     formatDate: function(date) {
@@ -74,15 +78,30 @@ var replacer = {
 }
 
 $(function() {
+    hideBody();
     gitblog.getIndex().done(function(index){
-        //load head tags from index
-        fixHeadTags(index);
-        fixPosts(index);
-        fixUsers(index);
-        fixPostPage();
-        fixUserProfile();
-        fixTagPage();
+        try{
+            fixHeadTags(index);
+            fixPosts(index);
+            fixUsers(index);
+            fixPostPage();
+            fixUserProfile();
+            fixTagPage();
+        }catch(e){
+            console.error(e);
+        }
+        showBody();
+    }).fail(function(){
+        showBody();
     });
+
+    function hideBody(){
+        $('body').hide();
+    }
+
+    function showBody(){
+        $('body').show();
+    }
 
     //fixes a tag page
     function fixTagPage(){
@@ -355,7 +374,8 @@ $(function() {
     function cleanSlice(arr, f, t){
         var res = [];
         for(i = f; i < t; i++){
-            res[res.length] = arr[i];
+            if(arr[i] !== undefined)
+                res[res.length] = arr[i];
         }
 
         return res;
